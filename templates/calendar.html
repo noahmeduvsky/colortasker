@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar - Color Tasker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        /* Basic grid styling for the calendar */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-top: 20px;
+        }
+        .calendar-day {
+            padding: 10px;
+            border: 1px solid #ccc;
+            text-align: center;
+            cursor: pointer;
+        }
+        .tasks-popup {
+            display: none;
+            position: fixed;
+            top: 20%;
+            left: 50%;
+            transform: translate(-50%, -20%);
+            background: #fff;
+            padding: 20px;
+            border: 1px solid #333;
+            z-index: 10;
+        }
+        .tasks-popup.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Calendar</h1>
+            <a href="{{ url_for('index') }}">Back to Home</a>
+        </header>
+        
+        <section class="calendar">
+            <div class="calendar-grid">
+                {% for day in month_days %}
+                    <div class="calendar-day" onclick="showTasks('{{ day.date }}')">
+                        <strong>{{ day.day }}</strong>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Popup to show tasks for a specific day -->
+        <div class="tasks-popup" id="tasksPopup">
+            <h3>Tasks on <span id="selectedDate"></span></h3>
+            <ul id="tasksList"></ul>
+            <button onclick="closePopup()">Close</button>
+        </div>
+    </div>
+
+    <script>
+        function showTasks(date) {
+            fetch("{{ url_for('tasks_for_day') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ date: date })
+            })
+            .then(response => response.json())
+            .then(tasks => {
+                const tasksList = document.getElementById('tasksList');
+                tasksList.innerHTML = '';
+                document.getElementById('selectedDate').innerText = date;
+
+                if (tasks.length === 0) {
+                    tasksList.innerHTML = '<li>No tasks assigned to this day.</li>';
+                } else {
+                    tasks.forEach(task => {
+                        const taskItem = document.createElement('li');
+                        taskItem.innerText = `${task.name} (Folder: ${task.folder}, Color: ${task.color})`;
+                        tasksList.appendChild(taskItem);
+                    });
+                }
+
+                document.getElementById('tasksPopup').classList.add('active');
+            });
+        }
+
+        function closePopup() {
+            document.getElementById('tasksPopup').classList.remove('active');
+        }
+    </script>
+</body>
+</html>

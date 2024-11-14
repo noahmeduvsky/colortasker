@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Tasker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header with logout option -->
+        <header>
+            <h1>ColorTasker</h1>
+            {% if session.get('user_id') %}
+                <a href="{{ url_for('logout') }}" class="logout-button">Logout</a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="login-button">Login</a>
+                <a href="{{ url_for('signup') }}" class="signup-button">Sign Up</a>
+            {% endif %}
+        </header>
+
+        <!-- Sidebar for folders -->
+        <aside class="sidebar">
+            <h2>Folders</h2>
+            <div class="folder-list">
+                {% for folder in folders %}
+                    <div class="folder">
+                        <a href="{{ url_for('folder_page', folder_id=folder.id) }}">{{ folder.name }}</a>
+                        <form action="{{ url_for('delete_folder', folder_id=folder.id) }}" method="POST" class="delete-folder-form">
+                            <button type="submit" class="delete-button">Delete</button>
+                        </form>
+                    </div>
+                {% endfor %}
+            </div>
+            <form action="{{ url_for('add_folder') }}" method="POST" class="add-folder-form">
+                <input type="text" name="folder_name" placeholder="New Folder" required>
+                <button type="submit">Add Folder</button>
+            </form>
+        </aside>
+
+        <!-- Main content for collaborators and calendar access -->
+        <main>
+            <section class="collaborators">
+                <h2>Collaborators</h2>
+                <ul class="user-list">
+                    {% for user in users %}
+                        <li>
+                            <form action="{{ url_for('user_tasks', user_id=user.id) }}" method="POST" class="view-tasks-form">
+                                <button type="submit">{{ user.name }}</button>
+                                <input type="password" name="password" placeholder="Enter password" required>
+                            </form>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <form action="{{ url_for('add_user') }}" method="POST" class="add-user-form">
+                    <input type="text" name="user_name" placeholder="New User" required>
+                    <input type="password" name="password" placeholder="Password" required>
+                    <button type="submit">Add User</button>
+                </form>
+            </section>
+            
+            <section class="calendar-link">
+                <h2>Calendar</h2>
+                <p>View tasks by date</p>
+                <a href="{{ url_for('calendar') }}" class="calendar-button">Go to Calendar</a>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

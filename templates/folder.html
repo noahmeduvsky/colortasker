@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ folder.name }} - Color Tasker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>{{ folder.name }} Tasks</h1>
+            <a href="{{ url_for('index') }}">Back to All Folders</a>
+        </header>
+        <section class="tasks">
+            <h2>Tasks in {{ folder.name }}</h2>
+            <div class="task-list">
+                {% for task in folder.tasks %}
+                    <div class="task" style="background-color: {{ task.color }};">
+                        <p>{{ task.name }} - Due: {{ task.deadline }}</p>
+                        <p>Assigned to:
+                            {% for user in task.users %}
+                                {{ user.name }}{% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                        </p>
+                        <form action="{{ url_for('delete_task', task_id=task.id, folder_id=folder.id) }}" method="POST" class="delete-task-form">
+                            <button type="submit" class="delete-button">Delete</button>
+                        </form>
+                    </div>
+                {% endfor %}
+            </div>
+            <form action="{{ url_for('add_task') }}" method="POST" class="add-task-form">
+                <input type="text" name="task_name" placeholder="New Task" required>
+                <input type="date" name="deadline" min="{{ today }}" required>
+                <select name="color">
+                    <option value="yellow">Yellow</option>
+                    <option value="green">Green</option>
+                    <option value="red">Red</option>
+                </select>
+                
+                <!-- Multi-select dropdown for users -->
+                <label for="assigned_users">Assign Users:</label>
+                <select name="assigned_users" multiple required>
+                    {% for user in users %}
+                        <option value="{{ user.id }}">{{ user.name }}</option>
+                    {% endfor %}
+                </select>
+                
+                <input type="hidden" name="folder_id" value="{{ folder.id }}">
+                <button type="submit">Add Task</button>
+            </form>
+        </section>
+    </div>
+</body>
+</html>
