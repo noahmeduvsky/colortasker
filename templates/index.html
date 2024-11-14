@@ -5,28 +5,72 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Color Tasker</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        .flash-message {
+            margin: 10px;
+            padding: 10px;
+            border: 1px solid transparent;
+            border-radius: 5px;
+        }
+        .flash-message.success {
+            color: #155724;
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+        .flash-message.warning {
+            color: #856404;
+            background-color: #fff3cd;
+            border-color: #ffeeba;
+        }
+        .right-sidebar {
+            float: right;
+            width: 20%;
+            margin-top: 20px;
+        }
+        /* Context menu styling */
+        .context-menu {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            border: 1px solid #ccc;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            padding: 10px;
+        }
+        .context-menu button {
+            display: block;
+            width: 100%;
+            padding: 5px;
+            background: none;
+            border: none;
+            text-align: left;
+            cursor: pointer;
+        }
+        .context-menu button:hover {
+            background-color: #eee;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <!-- Header with logout option -->
-        <header>
-            <h1>ColorTasker</h1>
-            {% if session.get('user_id') %}
-                <a href="{{ url_for('logout') }}" class="logout-button">Logout</a>
-            {% else %}
-                <a href="{{ url_for('login') }}" class="login-button">Login</a>
-                <a href="{{ url_for('signup') }}" class="signup-button">Sign Up</a>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div id="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
             {% endif %}
-        </header>
-
-        <!-- Sidebar for folders -->
+        {% endwith %}
+        
         <aside class="sidebar">
             <h2>Folders</h2>
             <div class="folder-list">
                 {% for folder in folders %}
-                    <div class="folder">
+                    <div class="folder" oncontextmenu="showContextMenu(event, {{ folder.id }})">
                         <a href="{{ url_for('folder_page', folder_id=folder.id) }}">{{ folder.name }}</a>
-                        <form action="{{ url_for('delete_folder', folder_id=folder.id) }}" method="POST" class="delete-folder-form">
+                        <button onclick="editFolder({{ folder.id }})">Edit</button>
+                        <form action="{{ url_for('delete_folder', folder_id=folder.id) }}" method="POST" class="delete-folder-form" style="display: inline;">
                             <button type="submit" class="delete-button">Delete</button>
                         </form>
                     </div>
@@ -34,37 +78,144 @@
             </div>
             <form action="{{ url_for('add_folder') }}" method="POST" class="add-folder-form">
                 <input type="text" name="folder_name" placeholder="New Folder" required>
+                
+                <!-- Updated "Assign Friends" dropdown to include the current user -->
+                <label for="assigned_users">Assign Users (including yourself):</label>
+                <select name="assigned_users" multiple>
+                    <option value="{{ current_user.id }}">{{ current_user.name }} (You)</option>
+                    {% for friend in friends %}
+                        <option value="{{ friend.id }}">{{ friend.name }}</option>
+                    {% endfor %}
+                </select>
+                
                 <button type="submit">Add Folder</button>
             </form>
         </aside>
 
-        <!-- Main content for collaborators and calendar access -->
         <main>
-            <section class="collaborators">
-                <h2>Collaborators</h2>
-                <ul class="user-list">
-                    {% for user in users %}
-                        <li>
-                            <form action="{{ url_for('user_tasks', user_id=user.id) }}" method="POST" class="view-tasks-form">
-                                <button type="submit">{{ user.name }}</button>
-                                <input type="password" name="password" placeholder="Enter password" required>
-                            </form>
-                        </li>
-                    {% endfor %}
-                </ul>
-                <form action="{{ url_for('add_user') }}" method="POST" class="add-user-form">
-                    <input type="text" name="user_name" placeholder="New User" required>
-                    <input type="password" name="password" placeholder="Password" required>
-                    <button type="submit">Add User</button>
-                </form>
-            </section>
+            <header>
+                <h1>ColorTasker</h1>
+                <a href="{{ url_for('calendar') }}">View Calendar</a>
+                <a href="{{ url_for('logout') }}">Logout</a>
+            </header>
             
-            <section class="calendar-link">
-                <h2>Calendar</h2>
-                <p>View tasks by date</p>
-                <a href="{{ url_for('calendar') }}" class="calendar-button">Go to Calendar</a>
+            <!-- Add Friends Section -->
+            <section class="add-friends">
+                <h2>Add Friends</h2>
+                <input type="text" id="friend-search" placeholder="Search for friends" onkeyup="searchFriends()">
+                <ul id="friend-suggestions" class="suggestions-list"></ul>
             </section>
         </main>
+        
+        <!-- Friends List Sidebar -->
+        <aside class="sidebar right-sidebar">
+            <h2>Friends List</h2>
+            <ul class="friends-list">
+                {% for friend in friends %}
+                    <li>{{ friend.name }}</li>
+                {% endfor %}
+            </ul>
+        </aside>
+
+        <!-- Context Menu for Folder Actions -->
+        <div class="context-menu" id="context-menu">
+            <button onclick="triggerEdit()">Edit</button>
+            <button onclick="triggerDelete()">Delete</button>
+        </div>
+
+        <!-- Edit Folder Modal (Hidden by Default) -->
+        <div id="edit-folder-modal" style="display:none;">
+            <h2>Edit Folder</h2>
+            <form id="edit-folder-form" method="POST">
+                <label for="folder-name">Folder Name:</label>
+                <input type="text" id="folder-name" name="folder_name" required>
+                
+                <label for="assigned_users">Assign Friends:</label>
+                <select id="assigned-users" name="assigned_users" multiple>
+                    <option value="{{ current_user.id }}">{{ current_user.name }} (You)</option>
+                    {% for friend in friends %}
+                        <option value="{{ friend.id }}">{{ friend.name }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit">Save Changes</button>
+            </form>
+        </div>
     </div>
+
+    <script>
+        let selectedFolderId;
+
+        function showContextMenu(event, folderId) {
+            event.preventDefault();
+            selectedFolderId = folderId;
+            const contextMenu = document.getElementById("context-menu");
+            contextMenu.style.top = `${event.clientY}px`;
+            contextMenu.style.left = `${event.clientX}px`;
+            contextMenu.style.display = "block";
+            document.addEventListener("click", hideContextMenu);
+        }
+
+        function hideContextMenu() {
+            document.getElementById("context-menu").style.display = "none";
+            document.removeEventListener("click", hideContextMenu);
+        }
+
+        function triggerEdit() {
+            hideContextMenu();
+            editFolder(selectedFolderId);
+        }
+
+        function triggerDelete() {
+            hideContextMenu();
+            document.querySelector(`.folder-list .folder button.delete-button`).click();
+        }
+
+        function editFolder(folderId) {
+            document.getElementById("edit-folder-modal").style.display = "block";
+            document.getElementById("edit-folder-form").action = `{{ url_for('edit_folder', folder_id=0) }}`.replace("0", folderId);
+        }
+
+        document.getElementById("edit-folder-form").onsubmit = function() {
+            document.getElementById("edit-folder-modal").style.display = "none";
+        };
+
+        function searchFriends() {
+            const query = document.getElementById('friend-search').value;
+            if (query.length > 0) {
+                fetch("{{ url_for('search_users') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ search_query: query })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const suggestionsList = document.getElementById('friend-suggestions');
+                    suggestionsList.innerHTML = '';
+                    data.forEach(user => {
+                        const suggestionItem = document.createElement('li');
+                        suggestionItem.innerHTML = `
+                            <span>${user.name}</span>
+                            <form action="{{ url_for('add_friend') }}" method="POST" style="display: inline;">
+                                <input type="hidden" name="friend_id" value="${user.id}">
+                                <button type="submit">Add Friend</button>
+                            </form>
+                        `;
+                        suggestionsList.appendChild(suggestionItem);
+                    });
+                });
+            } else {
+                document.getElementById('friend-suggestions').innerHTML = '';
+            }
+        }
+
+        setTimeout(() => {
+            const flashMessages = document.getElementById('flash-messages');
+            if (flashMessages) {
+                flashMessages.style.display = 'none';
+            }
+        }, 5000);
+    </script>
 </body>
 </html>

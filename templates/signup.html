@@ -2,17 +2,28 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up - Color Tasker</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
     <h1>Sign Up</h1>
     <form action="{{ url_for('signup') }}" method="POST">
-        <input type="text" name="username" placeholder="Username" required>
-        <input type="password" name="password" placeholder="Password" required>
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+        
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+        
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+        
+        <label for="confirm_password">Confirm Password:</label>
+        <input type="password" id="confirm_password" name="confirm_password" required>
+        
         <button type="submit">Sign Up</button>
     </form>
-    <p>Already have an account? <a href="{{ url_for('login') }}">Log in here</a></p>
+
+    <!-- Flash messages for form validation or signup status -->
     {% with messages = get_flashed_messages() %}
         {% if messages %}
             <ul>
@@ -22,5 +33,9 @@
             </ul>
         {% endif %}
     {% endwith %}
+
+    <!-- Link to the login page -->
+    <p>Already have an account? <a href="{{ url_for('login') }}">Log in here</a></p>
 </body>
 </html>
+
