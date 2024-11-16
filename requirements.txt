@@ -1,0 +1,15 @@
+Flask~=3.1.0
+Werkzeug~=3.1.3
+jupyter~=1.0.0
+pip~=22.0.2
+attrs~=23.2.0
+wheel~=0.37.1
+Brotli~=1.0.9
+cryptography~=3.4.8
+lxml~=4.8.0
+Pillow~=9.0.1
+tornado~=6.4.1
+Jinja2~=3.1.3
+keyring~=23.5.0
+setuptools~=59.6.0
+WTForms~=3.2.1

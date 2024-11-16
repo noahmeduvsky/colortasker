@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ current_user.name }}'s Dashboard</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <!-- CSRF Token Meta Tag -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <!-- Optional: Include your custom CSS -->
+    <!--
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    -->
+</head>
+
+<body>
+    <div class="container">
+        <!-- Navigation Bar -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="#">YourApp</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <span class="nav-link">Logged in as {{ current_user.name }}</span>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('auth.logout') }}">Log Out</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Page Header -->
+        <div class="mt-4 mb-4">
+            <h1>Dashboard</h1>
+            <!-- Buttons to trigger modals -->
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createFolderModal">
+                Create New Folder
+            </button>
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createTaskModal">
+                Create New Task
+            </button>
+        </div>
+
+        <!-- Folders List -->
+        <h2>Your Folders</h2>
+        <ul id="foldersList" class="list-group">
+            {% for folder in folders %}
+                <li class="list-group-item">{{ folder.name }}</li>
+            {% else %}
+                <li class="list-group-item">No folders yet.</li>
+            {% endfor %}
+        </ul>
+
+        <!-- Tasks List -->
+        <h2 class="mt-4">Your Tasks</h2>
+        <ul id="tasksList" class="list-group">
+            {% for task in tasks %}
+                <li class="list-group-item">
+                    {{ task.name }} - Due {{ task.deadline.strftime('%Y-%m-%d') if task.deadline else 'No deadline' }}
+                </li>
+            {% else %}
+                <li class="list-group-item">No tasks yet.</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Modals -->
+
+    <!-- Create Folder Modal -->
+    <div class="modal fade" id="createFolderModal" tabindex="-1" role="dialog" aria-labelledby="createFolderModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <form id="createFolderForm">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Create New Folder</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+
+            <div class="modal-body">
+              <!-- Messages Placeholder -->
+              <div id="folderMessages"></div>
+
+              <!-- CSRF Token -->
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+              <!-- Form Fields -->
+              <div class="form-group">
+                <label for="folderName">Folder Name</label>
+                <input type="text" class="form-control" id="folderName" name="folder_name" required>
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-primary">Create Folder</button>
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Create Task Modal -->
+    <div class="modal fade" id="createTaskModal" tabindex="-1" role="dialog" aria-labelledby="createTaskModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <form id="createTaskForm">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Create New Task</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+
+            <div class="modal-body">
+              <!-- Messages Placeholder -->
+              <div id="taskMessages"></div>
+
+              <!-- CSRF Token -->
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+              <!-- Form Fields -->
+              <div class="form-group">
+                <label for="taskName">Task Name</label>
+                <input type="text" class="form-control" id="taskName" name="task_name" required>
+              </div>
+              <div class="form-group">
+                <label for="folderId">Folder</label>
+                <select class="form-control" id="folderId" name="folder_id" required>
+                  {% for folder in folders %}
+                    <option value="{{ folder.id }}">{{ folder.name }}</option>
+                  {% else %}
+                    <option disabled>No folders available</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="deadline">Deadline</label>
+                <input type="date" class="form-control" id="deadline" name="deadline">
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-primary">Create Task</button>
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Optional: Define URLs for AJAX calls -->
+    <script>
+      window.createFolderUrl = "{{ url_for('main.create_folder') }}";
+      window.createTaskUrl = "{{ url_for('main.create_task') }}";
+    </script>
+
+    <!-- Include jQuery, Popper.js, and Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <!-- Popper.js and Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <!-- Include your external JavaScript file -->
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>
