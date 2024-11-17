@@ -1,8 +1,7 @@
-from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify
+from flask import Blueprint, render_template, redirect, url_for, request, jsonify
 from flask_login import login_required, current_user
-from extensions import db
-from models.folder import Folder
-from models.task import Task
+from colortasker.extensions import db
+from colortasker.models import Folder, Task
 from datetime import datetime
 
 main_bp = Blueprint('main', __name__)
@@ -11,7 +10,8 @@ main_bp = Blueprint('main', __name__)
 def index():
     if current_user.is_authenticated:
         return redirect(url_for('main.dashboard'))
-    return render_template('auth/login.html')
+    else:
+        return redirect(url_for('auth.login'))
 
 @main_bp.route('/dashboard')
 @login_required

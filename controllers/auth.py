@@ -1,8 +1,8 @@
 from flask import Blueprint, render_template, redirect, url_for, flash
 from flask_login import login_user, logout_user, login_required
-from models.user import User
-from extensions import db
-from forms import LoginForm, SignupForm
+from colortasker.models import User
+from colortasker.extensions import db
+from colortasker.forms import LoginForm, SignupForm
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -33,12 +33,10 @@ def login():
         user = User.query.filter_by(name=form.username.data).first()
         if user and user.check_password(form.password.data):
             login_user(user)
-            return redirect(url_for('main.index'))
+            return redirect(url_for('main.dashboard'))
         else:
             flash('Invalid username or password.')
-            return redirect(url_for('auth/login.html'))
-
-    return render_template('login.html', form=form)
+    return render_template('auth/login.html', form=form)
 
 
 @auth_bp.route('/logout')
