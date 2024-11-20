@@ -1,6 +1,7 @@
 from colortasker.extensions import db
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
 
 task_user = db.Table('task_user',
     db.Column('task_id', db.Integer, db.ForeignKey('tasks.id'), primary_key=True),
@@ -29,6 +30,7 @@ class Task(db.Model):
     is_complete = db.Column(db.Boolean, default=False)
     folder_id = db.Column(db.Integer, db.ForeignKey('folders.id'), nullable=False)
     users = db.relationship('User', secondary=task_user, back_populates='tasks')
+    comments = db.relationship('Comment', back_populates='task', cascade='all, delete-orphan')
 
     def __init__(self, name, description, color, deadline, folder_id):
         self.name = name
@@ -48,7 +50,7 @@ class User(db.Model, UserMixin):
     # Relationships
     folders = db.relationship('Folder', backref='owner', lazy=True)
     tasks = db.relationship('Task', secondary=task_user, back_populates='users')
-
+    comments = db.relationship('Comment', back_populates='user', cascade='all, delete-orphan')
 
     def __init__(self, name, email, password):
         self.name = name
@@ -61,3 +63,13 @@ class User(db.Model, UserMixin):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+class Comment(db.Model):
+    __tablename__ = 'comment'
+    id = db.Column(db.Integer, primary_key=True)
+    content = db.Column(db.Text, nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    task_id = db.Column(db.Integer, db.ForeignKey('tasks.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+
+    task = db.relationship('Task', back_populates='comments')
+    user = db.relationship('User')

@@ -11,150 +11,267 @@
         .modal {
             display: none;
             position: fixed;
-            z-index: 1000;
+            z-index: 1500;
             left: 0;
             top: 0;
             width: 100%;
             height: 100%;
             overflow: auto;
-            background-color: rgba(0,0,0,0.4);
+            background-color: rgba(0,0,0,0.5);
         }
         .modal-content {
             background-color: #fefefe;
             margin: 5% auto;
-            padding: 20px;
+            padding: 30px;
             border: 1px solid #888;
-            width: 60%;
+            width: 50%;
+            border-radius: 10px;
+            position: relative;
         }
         .close-button {
-            float: right;
+            position: absolute;
+            right: 20px;
+            top: 15px;
             font-size: 28px;
             font-weight: bold;
+            color: #7f8c8d;
             cursor: pointer;
+        }
+        .close-button:hover {
+            color: #e74c3c;
         }
         /* Sidebar and dashboard styling */
         body {
+            margin: 0;
             display: flex;
             font-family: Arial, sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
         }
         .sidebar {
             width: 250px;
-            background-color: #f4f4f4;
+            background-color: #34495e;
             padding: 20px;
             height: 100vh;
+            box-sizing: border-box;
+            position: fixed;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         .content {
             flex: 1;
-            padding: 20px;
+            padding: 40px;
+            margin-left: 250px;
+            background-color: #f0f4f8;
+            min-height: 100vh;
         }
         .folder-list {
             list-style: none;
             padding: 0;
+            margin-top: 30px;
         }
         .folder-list li {
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
         .folder-link {
             text-decoration: none;
-            color: #333;
+            color: #ecf0f1;
+            font-size: 18px;
             display: flex;
             align-items: center;
+            transition: color 0.3s;
         }
         .folder-link:hover {
-            color: #007bff;
+            color: #e74c3c;
         }
         .edit-folder-button {
             background-color: transparent;
             border: none;
-            color: #007bff;
+            color: #ecf0f1;
             cursor: pointer;
+            font-size: 16px;
+            transition: color 0.3s;
+        }
+        .edit-folder-button:hover {
+            color: #e74c3c;
         }
         .task-block {
-            display: inline-block;
             width: 150px;
             height: 150px;
             margin: 10px;
             padding: 10px;
             color: #fff;
+            border-radius: 15px;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
+            text-align: center;
             font-weight: bold;
-            border-radius: 10px;
             cursor: pointer;
-            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s;
         }
-        .collaborators {
+        .task-block:hover {
+            transform: translateY(-5px);
+        }
+        .task-block .task-name {
+            font-size: 18px;
+        }
+        .task-block .task-description {
+            display: none;
+            font-style: italic;
+            font-size: 14px;
+            margin-top: 5px;
+            color: #ecf0f1;
+        }
+        .task-block:hover .task-description {
+            display: block;
+        }
+        .task-buttons {
+            position: absolute;
+            bottom: 10px;
+            display: none;
+            gap: 5px;
+        }
+        .task-buttons button {
+            padding: 5px 10px;
+            font-size: 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .task-delete-button {
+            background-color: #e74c3c;
+            color: #fff;
+        }
+        .task-complete-button {
+            background-color: #27ae60;
+            color: #fff;
+        }
+        .task-delete-button:hover {
+            background-color: #c0392b;
+        }
+        .task-complete-button:hover {
+            background-color: #229954;
+        }
+        .task-block:hover .task-buttons {
             display: flex;
-            gap: 20px;
-            margin-bottom: 20px;
         }
-        .collaborator {
-            text-align: center;
-        }
-        .collaborator img {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
+        .task-complete {
+            opacity: 0.6;
+            text-decoration: line-through;
         }
         .add-button {
-            background-color: red;
+            background-color: #e74c3c;
             color: white;
             border: none;
             border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            font-size: 30px;
+            width: 60px;
+            height: 60px;
+            font-size: 36px;
             cursor: pointer;
             position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 1000;
+            bottom: 30px;
+            right: 30px;
+            z-index: 900;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .add-button:hover {
+            background-color: #c0392b;
+            transform: scale(1.05);
         }
         .dropdown {
             position: absolute;
             display: none;
-            top: 60px;
-            left: 20px;
-            background-color: #f4f4f4;
-            border: 1px solid #ddd;
+            bottom: 80px;
+            right: 20px;
+            background-color: #ecf0f1;
+            border: 1px solid #bdc3c7;
             border-radius: 5px;
             padding: 10px;
-            z-index: 1100;
+            z-index: 950;
         }
         .dropdown button {
             display: block;
             width: 100%;
             margin-bottom: 5px;
-            background-color: #fff;
-            border: 1px solid #ddd;
+            background-color: #3498db;
+            color: #fff;
+            border: none;
             border-radius: 3px;
             cursor: pointer;
+            padding: 10px;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .dropdown button:hover {
+            background-color: #2980b9;
+        }
+        .icon-button {
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
             padding: 5px;
+            border-radius: 50%;
+            transition: background-color 0.3s;
+        }
+        .icon-button:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+        .icon-image {
+            width: 30px;
+            height: 30px;
+        }
+        /* Logout Button */
+        .logout-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #e74c3c;
+            color: white;
+            text-decoration: none;
+            border: none;
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            z-index: 800;
         }
     </style>
     {% endblock %}
 </head>
 <body>
+    <!-- Logout Button -->
+    <a href="{{ url_for('auth.logout') }}" class="logout-button">Logout</a>
+
     <div class="sidebar">
-        <h2>Folders</h2>
-        <ul class="folder-list">
-            {% for folder in folders %}
-                <li>
-                    <a href="#" class="folder-link" data-folder-id="{{ folder.id }}">{{ folder.name }}</a>
-                    <button class="edit-folder-button" onclick="editFolder('{{ folder.id }}', '{{ folder.name }}')">Edit</button>
-                </li>
-            {% else %}
-                <li>You have no folders.</li>
-            {% endfor %}
-        </ul>
-        <button id="calendar-button" class="icon-button">
-        <img src="{{ url_for('static', filename='images/calendar_icon.png') }}" alt="Calendar" class="icon-image">
-    </button>
+        <div class="calendar-button-container">
+            <button id="calendar-button" class="icon-button">
+                <img src="{{ url_for('static', filename='images/calendar_icon.png') }}" alt="Calendar" class="icon-image">
+            </button>
+        </div>
+        <div>
+            <h2>Folders</h2>
+            <ul class="folder-list">
+                {% for folder in folders %}
+                    <li>
+                        <a href="#" class="folder-link" data-folder-id="{{ folder.id }}">{{ folder.name }}</a>
+                        <button class="edit-folder-button" onclick="editFolder('{{ folder.id }}', '{{ folder.name }}')">Edit</button>
+                    </li>
+                {% else %}
+                    <li>You have no folders.</li>
+                {% endfor %}
+            </ul>
+        </div>
     </div>
+
     <div class="content">
         <h1>ColorTasker</h1>
         {% if collaborators %}
@@ -172,6 +289,7 @@
             <!-- Task blocks will be populated here -->
         </div>
     </div>
+
     <button class="add-button" id="add-button">+</button>
     <div class="dropdown" id="add-dropdown">
         <button id="add-new-task">Add New Task</button>
@@ -201,10 +319,28 @@
                 <textarea name="description" id="task-description"></textarea>
 
                 <label for="task-color">Color:</label>
-                <input type="color" name="color" id="task-color" value="#ffffff">
+                <input type="color" name="color" id="task-color" value="#3498db">
 
                 <button type="submit">Save Task</button>
             </form>
+            <!-- Collaborators Section -->
+            <div id="collaborators-section">
+                <h3>Collaborators</h3>
+                <ul id="collaborators-list">
+                    <!-- List of collaborators will be populated here -->
+                </ul>
+                <input type="email" id="invite-email" placeholder="Invite user by email">
+                <button id="invite-button">Invite</button>
+            </div>
+            <!-- Comments Section -->
+            <div id="comments-section">
+                <h3>Comments</h3>
+                <div id="comments-container">
+                    <!-- Comments will be loaded here -->
+                </div>
+                <textarea id="comment-content" placeholder="Add a comment..."></textarea>
+                <button id="add-comment-button">Add Comment</button>
+            </div>
         </div>
     </div>
 
@@ -220,12 +356,6 @@
 
     {% block scripts %}
     <script>
-
-        // Add event listener to calendar button
-        document.getElementById('calendar-button').onclick = function() {
-            window.location.href = "{{ url_for('main.calendar_view') }}";
-        };
-
         document.addEventListener('DOMContentLoaded', function() {
             // Elements
             const taskModal = document.getElementById('task-modal');
@@ -239,6 +369,11 @@
             let currentFolderId = null;
             let currentTaskId = null;
             let actionType = ''; // 'delete' or 'complete'
+
+            // Calendar Button
+            document.getElementById('calendar-button').onclick = function() {
+                window.location.href = "{{ url_for('main.calendar_view') }}";
+            };
 
             // Toggle Add Dropdown
             addButton.onclick = function() {
@@ -307,7 +442,7 @@
                         if (task.is_complete) {
                             taskBlock.classList.add('task-complete');
                         }
-                        taskBlock.style.backgroundColor = task.color || '#ffffff';
+                        taskBlock.style.backgroundColor = task.color || '#3498db';
 
                         const taskName = document.createElement('div');
                         taskName.classList.add('task-name');
@@ -349,7 +484,7 @@
                         taskBlock.appendChild(taskDescription);
                         taskBlock.appendChild(taskButtons);
 
-                        // Hover effects for description
+                        // Hover effects for description and buttons
                         taskBlock.addEventListener('mouseover', function() {
                             taskDescription.style.display = 'block';
                             taskButtons.style.display = 'flex';
@@ -368,9 +503,6 @@
                 })
                 .catch(error => console.error('Error:', error));
             }
-
-
-
 
             // Attach click event to folder links
             document.querySelectorAll('.folder-link').forEach(link => {
@@ -432,6 +564,8 @@
                             document.getElementById('task-deadline').value = taskData.deadline;
                             document.getElementById('task-description').value = taskData.description;
                             document.getElementById('task-color').value = taskData.color;
+                            loadCollaborators(taskId);
+                            loadComments(taskId);
                             // Set the selected folder
                             folderSelect.value = taskData.folder_id;
                         })
@@ -439,6 +573,8 @@
                     } else {
                         // Clear form for new task
                         taskForm.reset();
+                        document.getElementById('collaborators-list').innerHTML = '';
+                        document.getElementById('comments-container').innerHTML = '';
                     }
                     taskModal.style.display = 'block';
                 })
@@ -508,32 +644,97 @@
                 .catch(error => console.error('Error:', error));
             };
 
-
-            // Handle Confirmation
-            document.getElementById('confirm-yes-button').onclick = function() {
-                const url = actionType === 'delete' ? '{{ url_for('main.delete_task') }}' : '{{ url_for('main.mark_complete') }}';
-                fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({ task_id: currentTaskId })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    confirmModal.style.display = 'none';
-                    // Refresh the task list
-                    if (currentFolderId) {
-                        openFolder(currentFolderId);
-                    }
-                })
-                .catch(error => console.error('Error:', error));
-            };
-
             document.getElementById('confirm-no-button').onclick = function() {
                 confirmModal.style.display = 'none';
             };
+
+            // Invite User Functionality
+            document.getElementById('invite-button').onclick = function() {
+                const email = document.getElementById('invite-email').value;
+                if (email) {
+                    fetch('{{ url_for('main.invite_user') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({ task_id: currentTaskId, email: email })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.message) {
+                            alert(data.message);
+                            // Update collaborators list
+                            loadCollaborators(currentTaskId);
+                        } else if (data.error) {
+                            alert(data.error);
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                }
+            };
+
+            // Load Collaborators
+            function loadCollaborators(taskId) {
+                fetch(`{{ url_for('main.get_task') }}?task_id=${taskId}`)
+                .then(response => response.json())
+                .then(taskData => {
+                    const collaboratorsList = document.getElementById('collaborators-list');
+                    collaboratorsList.innerHTML = '';
+                    taskData.collaborators.forEach(user => {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = user.email;
+                        collaboratorsList.appendChild(listItem);
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+            }
+
+            // Add Comment
+            document.getElementById('add-comment-button').onclick = function() {
+                const content = document.getElementById('comment-content').value;
+                if (content) {
+                    fetch('{{ url_for('main.add_comment') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({ task_id: currentTaskId, content: content })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.message) {
+                            document.getElementById('comment-content').value = '';
+                            loadComments(currentTaskId);
+                        } else if (data.error) {
+                            alert(data.error);
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                }
+            };
+
+            // Load Comments
+            function loadComments(taskId) {
+                fetch(`{{ url_for('main.get_comments') }}?task_id=${taskId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const commentsContainer = document.getElementById('comments-container');
+                    commentsContainer.innerHTML = '';
+                    data.comments.forEach(comment => {
+                        const commentDiv = document.createElement('div');
+                        commentDiv.classList.add('comment');
+                        commentDiv.innerHTML = `
+                            <p><strong>${comment.user_email}</strong> (${comment.timestamp}):</p>
+                            <p>${comment.content}</p>
+                        `;
+                        commentsContainer.appendChild(commentDiv);
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+            }
+
         });
     </script>
     {% endblock %}

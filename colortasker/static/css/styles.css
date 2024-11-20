@@ -4,6 +4,7 @@
 body {
     margin: 0;
     padding: 0;
+    display: flex;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #f0f4f8;
     color: #333;
@@ -30,6 +31,9 @@ a:hover {
     height: 100vh;
     box-sizing: border-box;
     position: fixed;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .sidebar h2 {
@@ -54,6 +58,9 @@ a:hover {
 .folder-link {
     color: #ecf0f1;
     font-size: 18px;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
     transition: color 0.3s;
 }
 
@@ -76,8 +83,9 @@ a:hover {
 
 /* Content Styles */
 .content {
+    flex: 1;
+    padding: 20px;
     margin-left: 270px;
-    padding: 40px;
     background-color: #f0f4f8;
     min-height: 100vh;
 }
@@ -93,33 +101,35 @@ a:hover {
     margin-bottom: 20px;
 }
 
-/* Task Block Styles */
+/* Task Container Styles */
 #task-container {
     display: flex;
     flex-wrap: wrap;
 }
 
+/* Task Block Styles */
 .task-block {
     width: 150px;
     height: 150px;
     margin: 10px;
     padding: 10px;
-    color: #333; /* Set text color to dark for readability */
+    color: #fff;
+    background-color: #3498db; /* Default background color */
     border-radius: 15px;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     text-align: center;
     font-weight: bold;
     cursor: pointer;
     position: relative;
-    flex-direction: column;
     overflow: hidden;
+    transition: transform 0.2s;
 }
 
 .task-block:hover {
     transform: translateY(-5px);
-    background-color: #2980b9;
 }
 
 .task-block .task-name {
@@ -131,13 +141,55 @@ a:hover {
     font-style: italic;
     font-size: 14px;
     margin-top: 5px;
-    color: #333;
+    color: #ecf0f1;
 }
 
 .task-block:hover .task-description {
     display: block;
 }
 
+.task-complete {
+    opacity: 0.6;
+    text-decoration: line-through;
+}
+
+/* Task Buttons Styles */
+.task-buttons {
+    position: absolute;
+    bottom: 10px;
+    display: none;
+    gap: 5px;
+}
+
+.task-buttons button {
+    padding: 5px 10px;
+    font-size: 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.task-delete-button {
+    background-color: #e74c3c;
+    color: #fff;
+}
+
+.task-complete-button {
+    background-color: #27ae60;
+    color: #fff;
+}
+
+.task-delete-button:hover {
+    background-color: #c0392b;
+}
+
+.task-complete-button:hover {
+    background-color: #229954;
+}
+
+.task-block:hover .task-buttons {
+    display: flex;
+}
 
 /* Collaborator Styles */
 .collaborators {
@@ -151,10 +203,9 @@ a:hover {
 }
 
 .collaborator img {
-    width: 60px;
-    height: 60px;
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
-    border: 3px solid #3498db;
 }
 
 .collaborator p {
@@ -176,7 +227,7 @@ a:hover {
     position: fixed;
     bottom: 30px;
     right: 30px;
-    z-index: 1000;
+    z-index: 900;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     transition: background-color 0.3s, transform 0.2s;
 }
@@ -190,13 +241,13 @@ a:hover {
 .dropdown {
     position: absolute;
     display: none;
-    top: -100px;
-    right: 0;
+    bottom: 80px;
+    right: 20px;
     background-color: #ecf0f1;
     border: 1px solid #bdc3c7;
     border-radius: 5px;
     padding: 10px;
-    z-index: 1100;
+    z-index: 950;
 }
 
 .dropdown button {
@@ -397,72 +448,38 @@ form button[type="submit"]:hover {
     }
 }
 
-/* Task Buttons Styles */
-.task-buttons {
-    position: absolute;
-    bottom: 10px;
-    display: none;
-    gap: 5px;
-}
-
-.task-buttons button {
-    padding: 5px 10px;
-    font-size: 12px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.task-delete-button {
-    background-color: #e74c3c;
-    color: #fff;
-}
-
-.task-complete-button {
-    background-color: #27ae60;
-    color: #fff;
-}
-
-.task-delete-button:hover {
-    background-color: #c0392b;
-}
-
-.task-complete-button:hover {
-    background-color: #229954;
-}
-
-/* Completed Task Style */
-.task-complete {
-    opacity: 0.6;
-    text-decoration: line-through;
-}
-
-/* Add these styles to your styles.css */
-
 /* Calendar Styles */
 .calendar-container {
-    margin: 20px auto;
-    max-width: 1000px;
+    margin: 40px auto; /* Center the calendar on the page */
+    max-width: 1000px; /* Set a maximum width for the container */
+    background-color: #ffffff; /* Set a background color for better visibility */
+    border-radius: 15px; /* Rounded corners for the calendar container */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Soft shadow for a modern look */
+    padding: 30px; /* Add padding for content spacing */
 }
 
 .calendar-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 20px; /* Add space below the header */
 }
 
 .calendar-header h2 {
     margin: 0;
+    font-size: 24px; /* Larger title for better readability */
+    color: #2c3e50;
 }
 
 .calendar-header button {
     background-color: #3498db;
     color: #fff;
     border: none;
-    padding: 10px 15px;
+    padding: 10px 20px; /* Increase padding for better button size */
     cursor: pointer;
     border-radius: 5px;
     font-size: 16px;
+    transition: background-color 0.3s;
 }
 
 .calendar-header button:hover {
@@ -471,23 +488,68 @@ form button[type="submit"]:hover {
 
 .calendar-grid {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 5px;
-    margin-top: 20px;
+    grid-template-columns: repeat(7, 1fr); /* 7 columns for the days of the week */
+    gap: 10px; /* Increase spacing between the days */
+    margin-top: 20px; /* Add space above the grid */
 }
 
 .calendar-day {
-    background-color: #ecf0f1;
-    padding: 10px;
-    min-height: 100px;
-    border-radius: 5px;
+    background-color: #ecf0f1; /* Light background for each day */
+    padding: 15px; /* Increased padding for better spacing */
+    min-height: 120px; /* Increase the height to make it more prominent */
+    border-radius: 8px; /* Rounded corners for each day */
     position: relative;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for each day */
 }
 
 .calendar-day-header {
     font-weight: bold;
-    margin-bottom: 5px;
+    margin-bottom: 10px; /* Add space below the day label */
+    font-size: 16px; /* Larger font for the day header */
 }
+
+.task-tile {
+    background-color: #e74c3c;
+    color: #fff;
+    padding: 8px; /* Increase padding for better visibility */
+    border-radius: 5px;
+    margin-bottom: 8px; /* Add space between tasks */
+    font-size: 14px; /* Increase font size for task tiles */
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: background-color 0.3s;
+}
+
+.task-tile:hover {
+    opacity: 0.9;
+}
+
+.today {
+    border: 2px solid #3498db; /* Highlight the current day with a blue border */
+}
+
+/* Responsive Calendar Styles */
+@media (max-width: 768px) {
+    .calendar-container {
+        max-width: 90%; /* Decrease the width for smaller screens */
+    }
+
+    .calendar-day {
+        min-height: 100px; /* Adjust height for smaller screens */
+    }
+
+    .calendar-header h2 {
+        font-size: 20px; /* Adjust header size */
+    }
+
+    .calendar-header button {
+        padding: 8px 15px; /* Adjust button padding */
+        font-size: 14px;
+    }
+}
+
 
 .task-tile {
     background-color: #e74c3c;
@@ -510,14 +572,13 @@ form button[type="submit"]:hover {
     border: 2px solid #3498db;
 }
 
-
 /* Icon Button Styles */
 .icon-button {
     background-color: transparent;
     border: none;
     cursor: pointer;
     position: fixed;
-    top: 90px; /* Adjust position as needed */
+    top: 90px;
     left: 20px;
     z-index: 1000;
     padding: 5px;
@@ -530,18 +591,22 @@ form button[type="submit"]:hover {
 }
 
 .icon-image {
-    width: 40px;
-    height: 40px;
+    width: 30px;
+    height: 30px;
 }
 
-/* Positioning for dashboard button */
-#dashboard-button {
-    top: 20px; /* Position at the top */
-    right: 20px; /* Position at the right */
-    left: auto;
-}
-
-#dashboard-button .icon-image {
-    width: 40px;
-    height: 40px;
+/* Logout Button */
+.logout-button {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #e74c3c;
+    color: white;
+    text-decoration: none;
+    border: none;
+    padding: 10px 15px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    z-index: 800;
 }
