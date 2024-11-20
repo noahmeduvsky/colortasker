@@ -151,6 +151,9 @@
                 <li>You have no folders.</li>
             {% endfor %}
         </ul>
+        <button id="calendar-button" class="icon-button">
+        <img src="{{ url_for('static', filename='images/calendar_icon.png') }}" alt="Calendar" class="icon-image">
+    </button>
     </div>
     <div class="content">
         <h1>ColorTasker</h1>
@@ -217,6 +220,12 @@
 
     {% block scripts %}
     <script>
+
+        // Add event listener to calendar button
+        document.getElementById('calendar-button').onclick = function() {
+            window.location.href = "{{ url_for('main.calendar_view') }}";
+        };
+
         document.addEventListener('DOMContentLoaded', function() {
             // Elements
             const taskModal = document.getElementById('task-modal');
@@ -286,46 +295,81 @@
 
             // Open Folder and Fetch Tasks
             function openFolder(folderId) {
-                console.log('Opening folder with ID:', folderId);
                 currentFolderId = folderId;
-
-                fetch(`/get_folder_content?folder_id=${folderId}`)
-                    .then(response => {
-                        if (response.status === 403) {
-                            console.error('Error: Unauthorized access to folder.');
-                            alert('You do not have permission to access this folder.');
-                            return;
+                fetch(`{{ url_for('main.get_folder_content') }}?folder_id=${folderId}`)
+                .then(response => response.json())
+                .then(data => {
+                    folderTitle.textContent = data.folder_name;
+                    taskContainer.innerHTML = '';
+                    data.tasks.forEach(task => {
+                        const taskBlock = document.createElement('div');
+                        taskBlock.classList.add('task-block');
+                        if (task.is_complete) {
+                            taskBlock.classList.add('task-complete');
                         }
-                        return response.json();
-                    })
-                    .then(data => {
-                        if (!data) return; // Stop if there was an authorization error
+                        taskBlock.style.backgroundColor = task.color || '#ffffff';
 
-                        console.log('Data received from server:', data);
+                        const taskName = document.createElement('div');
+                        taskName.classList.add('task-name');
+                        taskName.textContent = task.name;
 
-                        if (data.error) {
-                            console.error('Error:', data.error);
-                            return;
-                        }
+                        const taskDescription = document.createElement('div');
+                        taskDescription.classList.add('task-description');
+                        taskDescription.textContent = task.description || '';
 
-                        folderTitle.textContent = data.folder_name;
-                        taskContainer.innerHTML = '';  // Clear the task container
+                        // Buttons container
+                        const taskButtons = document.createElement('div');
+                        taskButtons.classList.add('task-buttons');
 
-                        data.tasks.forEach(task => {
-                            const taskBlock = document.createElement('div');
-                            taskBlock.classList.add('task-block');
-                            taskBlock.style.backgroundColor = task.color || '#ffffff';
-                            taskBlock.innerHTML = `<strong>${task.name}</strong><br>
-                                                   Deadline: ${task.deadline ? task.deadline : 'No deadline'}<br>
-                                                   Status: ${task.is_complete ? 'Complete' : 'Incomplete'}`;
-                            taskBlock.onclick = function() {
-                                openTaskModal(task.id);
+                        // Delete button
+                        const deleteButton = document.createElement('button');
+                        deleteButton.classList.add('task-delete-button');
+                        deleteButton.textContent = 'Delete';
+                        deleteButton.onclick = function(e) {
+                            e.stopPropagation();
+                            confirmAction('delete', task.id);
+                        };
+
+                        // Complete button (only if task is not complete)
+                        if (!task.is_complete) {
+                            const completeButton = document.createElement('button');
+                            completeButton.classList.add('task-complete-button');
+                            completeButton.textContent = 'Complete';
+                            completeButton.onclick = function(e) {
+                                e.stopPropagation();
+                                confirmAction('complete', task.id);
                             };
-                            taskContainer.appendChild(taskBlock);
+                            taskButtons.appendChild(completeButton);
+                        }
+
+                        taskButtons.appendChild(deleteButton);
+
+                        // Append elements to task block
+                        taskBlock.appendChild(taskName);
+                        taskBlock.appendChild(taskDescription);
+                        taskBlock.appendChild(taskButtons);
+
+                        // Hover effects for description
+                        taskBlock.addEventListener('mouseover', function() {
+                            taskDescription.style.display = 'block';
+                            taskButtons.style.display = 'flex';
                         });
-                    })
-                    .catch(error => console.error('Error fetching folder content:', error));
+                        taskBlock.addEventListener('mouseout', function() {
+                            taskDescription.style.display = 'none';
+                            taskButtons.style.display = 'none';
+                        });
+
+                        taskBlock.onclick = function() {
+                            openTaskModal(task.id);
+                        };
+
+                        taskContainer.appendChild(taskBlock);
+                    });
+                })
+                .catch(error => console.error('Error:', error));
             }
+
+
 
 
             // Attach click event to folder links
@@ -428,8 +472,6 @@
                     // Refresh the task list
                     if (currentFolderId) {
                         openFolder(currentFolderId);
-                    } else {
-                        // Optionally refresh all tasks
                     }
                 })
                 .catch(error => console.error('Error:', error));
@@ -443,6 +485,29 @@
                 document.getElementById('confirm-message').textContent = message;
                 confirmModal.style.display = 'block';
             }
+
+            // Handle Confirmation
+            document.getElementById('confirm-yes-button').onclick = function() {
+                const url = actionType === 'delete' ? '{{ url_for('main.delete_task') }}' : '{{ url_for('main.mark_complete') }}';
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ task_id: currentTaskId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    confirmModal.style.display = 'none';
+                    // Refresh the task list
+                    if (currentFolderId) {
+                        openFolder(currentFolderId);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            };
+
 
             // Handle Confirmation
             document.getElementById('confirm-yes-button').onclick = function() {
