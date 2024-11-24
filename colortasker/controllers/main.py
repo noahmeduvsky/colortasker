@@ -62,8 +62,15 @@ def create_task():
     color = request.form.get('color')
     description = request.form.get('description')
 
+    # Validate task_name and folder_id
     if not task_name or not folder_id:
         return jsonify({'error': 'Task name and folder are required.'}), 400
+
+    # Convert folder_id to integer
+    try:
+        folder_id = int(folder_id)  # Cast folder_id to integer
+    except ValueError:
+        return jsonify({'error': 'Invalid folder ID format.'}), 400
 
     # Validate folder ownership
     folder = Folder.query.filter_by(id=folder_id, owner_id=current_user.id).first()
@@ -100,17 +107,23 @@ def create_task():
     }
     return jsonify(response), 200
 
-
-
-
 @main_bp.route('/get_folder_content')
 @login_required
 def get_folder_content():
     folder_id = request.args.get('folder_id')
+
+    # Convert folder_id to integer
+    try:
+        folder_id = int(folder_id)
+    except ValueError:
+        return jsonify({'error': 'Invalid folder ID format.'}), 400
+
+    # Validate folder ownership
     folder = Folder.query.filter_by(id=folder_id, owner=current_user).first()
     if not folder:
         return jsonify({'error': 'Folder not found or not authorized.'}), 403
 
+    # Fetch tasks in the folder
     tasks = [
         {
             'id': task.id,
@@ -129,8 +142,6 @@ def get_folder_content():
     }
     return jsonify(response), 200
 
-
-
 @main_bp.route('/edit_task', methods=['POST'])
 @login_required
 def edit_task():
@@ -141,6 +152,17 @@ def edit_task():
     description = request.form.get('description')
     folder_id = request.form.get('folder_id')
 
+    # Validate inputs
+    if not task_id or not task_name or not folder_id:
+        return jsonify({'error': 'Task ID, Task Name, and Folder ID are required.'}), 400
+
+    # Convert folder_id to integer
+    try:
+        folder_id = int(folder_id)
+    except ValueError:
+        return jsonify({'error': 'Invalid folder ID format.'}), 400
+
+    # Retrieve the task and validate user access
     task = Task.query.get(task_id)
     if not task or current_user not in task.users:
         return jsonify({'error': 'Task not found or not authorized.'}), 403
@@ -174,7 +196,6 @@ def edit_task():
     }
     return jsonify(response), 200
 
-
 @main_bp.route('/get_task')
 @login_required
 def get_task():
@@ -195,8 +216,25 @@ def get_task():
     }
     return jsonify(response), 200
 
+@main_bp.route('/get_all_user_tasks', methods=['GET'])
+@login_required
+def get_all_user_tasks():
+    tasks = Task.query.filter(Task.users.contains(current_user)).all()
 
+    task_list = [
+        {
+            'id': task.id,
+            'name': task.name,
+            'deadline': task.deadline.strftime('%Y-%m-%d') if task.deadline else '',
+            'color': task.color or '#ffffff',
+            'description': task.description or '',
+            'folder_name': task.folder.name if task.folder else None,
+            'is_complete': task.is_complete,
+        }
+        for task in tasks
+    ]
 
+    return jsonify({'tasks': task_list}), 200
 
 @main_bp.route('/delete_task', methods=['POST'])
 @login_required
@@ -224,6 +262,30 @@ def mark_complete():
     db.session.commit()
     return jsonify({'message': 'Task marked as complete.'}), 200
 
+@main_bp.route('/delete_folder', methods=['POST'])
+@login_required
+def delete_folder():
+    data = request.get_json()  # Get the JSON data from the request
+    folder_id = data.get('folder_id')  # Extract the folder ID
+
+    if not folder_id:  # Validate that folder_id is provided
+        return jsonify({'error': 'Folder ID is required.'}), 400
+
+    # Validate that the folder exists and belongs to the current user
+    folder = Folder.query.filter_by(id=folder_id, owner=current_user).first()
+    if not folder:
+        return jsonify({'error': 'Folder not found or not authorized.'}), 403
+
+    # Delete all tasks associated with the folder
+    for task in folder.tasks:
+        db.session.delete(task)
+
+    # Delete the folder itself
+    db.session.delete(folder)
+    db.session.commit()
+
+    return jsonify({'message': 'Folder deleted successfully.'}), 200
+
 @main_bp.route('/edit_folder', methods=['POST'])
 @login_required
 def edit_folder():
@@ -234,15 +296,16 @@ def edit_folder():
     if not folder_id or not folder_name:
         return jsonify({'error': 'Folder ID and new name are required.'}), 400
 
+    # Validate folder ownership
     folder = Folder.query.filter_by(id=folder_id, owner=current_user).first()
     if not folder:
         return jsonify({'error': 'Folder not found or not authorized.'}), 403
 
+    # Update the folder name
     folder.name = folder_name
     db.session.commit()
 
-    response = {'folder_name': folder.name, 'folder_id': folder.id}
-    return jsonify(response), 200
+    return jsonify({'message': 'Folder updated successfully.'}), 200
 
 @main_bp.route('/get_user_folders')
 @login_required
@@ -373,13 +436,13 @@ def search_users():
 
     # Search users by name (case-insensitive) and exclude the current user
     users = User.query.filter(
-        User.name.ilike(f"%{query}%"),  # Use 'name' instead of 'username'
+        User.name.ilike(f"%{query}%"),  # Partial match on name
         User.id != current_user.id
     ).all()
 
     # Format the results
     results = [{'id': user.id, 'username': user.name} for user in users]
-    return jsonify({'results': results})
+    return jsonify({'results': results}), 200
 
 @main_bp.route('/add_friend', methods=['POST'])
 @login_required
@@ -401,4 +464,43 @@ def add_friend():
     db.session.commit()
 
     return jsonify({'message': 'Friend added successfully.'})
+
+@main_bp.route('/get_friends')
+@login_required
+def get_friends():
+    friends = Friend.query.filter(
+        (Friend.user_id == current_user.id) | (Friend.friend_id == current_user.id)
+    ).all()
+
+    friend_list = []
+    for friend in friends:
+        friend_user = friend.friend if friend.user_id == current_user.id else friend.user
+        friend_list.append({'id': friend_user.id, 'name': friend_user.name})
+
+    return jsonify({'friends': friend_list}), 200
+
+@main_bp.route('/invite_friends_to_task', methods=['POST'])
+@login_required
+def invite_friends_to_task():
+    data = request.get_json()
+    task_id = data.get('task_id')
+    friend_ids = data.get('friend_ids', [])
+
+    task = Task.query.get(task_id)
+    if not task or current_user not in task.users:
+        return jsonify({'error': 'Task not found or access denied.'}), 403
+
+    invited_count = 0
+    for friend_id in friend_ids:
+        try:
+            friend_user = User.query.get(int(friend_id))
+            if friend_user and friend_user not in task.users:
+                task.users.append(friend_user)
+                invited_count += 1
+        except ValueError:
+            continue
+
+    db.session.commit()
+
+    return jsonify({'message': f'{invited_count} friends successfully invited.'}), 200
 
