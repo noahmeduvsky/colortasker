@@ -244,6 +244,37 @@
             border-radius: 5px;
             z-index: 800;
         }
+        /* Add Friends Button */
+        .add-friends-button {
+            background-color: #1abc9c;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+            width: 100%;
+        }
+        .add-friends-button:hover {
+            background-color: #16a085;
+        }
+        /* Friends Section */
+        .friends-section {
+            margin-top: 30px;
+            width: 100%;
+            text-align: center;
+        }
+        .friends-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 10px;
+            color: #ecf0f1;
+        }
+        .friends-list li {
+            margin-bottom: 10px;
+        }
     </style>
     {% endblock %}
 </head>
@@ -269,6 +300,19 @@
                     <li>You have no folders.</li>
                 {% endfor %}
             </ul>
+        </div>
+
+        <!-- Friends Section -->
+        <div class="friends-section">
+            <h2>Your Friends</h2>
+            <ul class="friends-list">
+                {% for friend in friends %}
+                    <li>{{ friend.name }}</li>
+                {% else %}
+                    <li>You have no friends yet.</li>
+                {% endfor %}
+            </ul>
+            <button id="add-friends-btn" class="add-friends-button">Add Friends</button>
         </div>
     </div>
 
@@ -351,6 +395,17 @@
             <p id="confirm-message"></p>
             <button id="confirm-yes-button">Yes</button>
             <button id="confirm-no-button">No</button>
+        </div>
+    </div>
+
+    <!-- Add Friends Modal -->
+    <div id="add-friends-modal" class="modal">
+        <div class="modal-content">
+            <span id="close-modal" class="close-button">&times;</span>
+            <h2>Add Friends</h2>
+            <input type="text" id="friend-search" placeholder="Search for users..." />
+            <button id="search-btn">Search</button>
+            <ul id="search-results"></ul>
         </div>
     </div>
 
@@ -735,6 +790,72 @@
                 .catch(error => console.error('Error:', error));
             }
 
+            // Add Friends Modal Functionality
+            const addFriendsModal = document.getElementById('add-friends-modal');
+            const openAddFriendsButton = document.getElementById('add-friends-btn');
+            const closeAddFriendsButton = document.getElementById('close-modal');
+            const searchButton = document.getElementById('search-btn');
+            const searchResults = document.getElementById('search-results');
+            const searchInput = document.getElementById('friend-search');
+
+            // Open the modal
+            openAddFriendsButton.onclick = () => addFriendsModal.style.display = 'block';
+
+            // Close the modal
+            closeAddFriendsButton.onclick = () => addFriendsModal.style.display = 'none';
+
+            // Close modal when clicking outside
+            window.onclick = (event) => {
+                if (event.target === addFriendsModal) {
+                    addFriendsModal.style.display = 'none';
+                }
+            };
+
+            // Search for users
+            searchButton.onclick = async () => {
+                const query = searchInput.value.trim();
+                if (!query) return;
+
+                const response = await fetch(`/search_users?q=${encodeURIComponent(query)}`);
+                const data = await response.json();
+
+                searchResults.innerHTML = '';
+                if (data.results && data.results.length > 0) {
+                    data.results.forEach(user => {
+                        const li = document.createElement('li');
+                        li.textContent = user.username;
+                        const addButton = document.createElement('button');
+                        addButton.textContent = 'Add Friend';
+                        addButton.onclick = async () => {
+                            try {
+                                const addResponse = await fetch('/add_friend', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRFToken': '{{ csrf_token() }}'
+                                    },
+                                    body: JSON.stringify({ friend_id: user.id })
+                                });
+                                const addData = await addResponse.json();
+                                if (addResponse.ok) {
+                                    alert(addData.message || 'Friend added successfully!');
+                                    // Refresh the page to update the friends list
+                                    location.reload();
+                                } else {
+                                    alert(addData.error || 'Error adding friend.');
+                                }
+                            } catch (error) {
+                                console.error('Error adding friend:', error);
+                                alert('An error occurred while adding the friend. Please try again.');
+                            }
+                        };
+                        li.appendChild(addButton);
+                        searchResults.appendChild(li);
+                    });
+                } else {
+                    searchResults.innerHTML = '<li>No users found</li>';
+                }
+            };
         });
     </script>
     {% endblock %}

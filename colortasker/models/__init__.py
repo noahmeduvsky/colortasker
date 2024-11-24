@@ -1,3 +1,3 @@
-from .models import Folder, User, Task, Comment
+from .models import Folder, User, Task, Comment, Friend
 
-__all__ = ['User', 'Folder', 'Task', 'Comment']
+__all__ = ['User', 'Folder', 'Task', 'Comment', 'Friend']

@@ -51,6 +51,7 @@ class User(db.Model, UserMixin):
     folders = db.relationship('Folder', backref='owner', lazy=True)
     tasks = db.relationship('Task', secondary=task_user, back_populates='users')
     comments = db.relationship('Comment', back_populates='user', cascade='all, delete-orphan')
+    friends = db.relationship('Friend', primaryjoin='or_(User.id == Friend.user_id, User.id == Friend.friend_id)', lazy='dynamic')
 
     def __init__(self, name, email, password):
         self.name = name
@@ -73,3 +74,17 @@ class Comment(db.Model):
 
     task = db.relationship('Task', back_populates='comments')
     user = db.relationship('User')
+
+
+
+class Friend(db.Model):
+    __tablename__ = 'friends'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    friend_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    # Relationships
+    user = db.relationship('User', foreign_keys=[user_id], backref='friendships')
+    friend = db.relationship('User', foreign_keys=[friend_id], backref='friends_with')
