@@ -1,157 +1,70 @@
 <!-- templates/calendar.html -->
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    {% block head %}
-    <meta charset="UTF-8">
-    <title>Calendar - Color Tasker</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <style>
-        /* Calendar Styles */
-        .calendar-container {
-            margin: 20px auto;
-            max-width: 1000px;
-        }
-        .calendar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .calendar-header h2 {
-            margin: 0;
-        }
-        .calendar-header button {
-            background-color: #3498db;
-            color: #fff;
-            border: none;
-            padding: 10px 15px;
-            cursor: pointer;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-        .calendar-header button:hover {
-            background-color: #2980b9;
-        }
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 5px;
-            margin-top: 20px;
-        }
-        .calendar-day {
-            background-color: #ecf0f1;
-            padding: 10px;
-            min-height: 120px;
-            border-radius: 5px;
-            position: relative;
-            box-sizing: border-box;
-        }
-        .calendar-day-header {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        .task-tile {
-            color: #fff;
-            padding: 5px;
-            border-radius: 3px;
-            margin-bottom: 5px;
-            font-size: 12px;
-            cursor: pointer;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            position: relative;
-        }
-        .task-tile:hover .task-description {
-            display: block;
-        }
-        .task-description {
-            display: none;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background-color: rgba(0,0,0,0.8);
-            color: #fff;
-            padding: 5px;
-            border-radius: 3px;
-            font-size: 10px;
-            width: 100%;
-            box-sizing: border-box;
-            z-index: 10;
-        }
-        .today {
-            border: 2px solid #3498db;
-        }
-
-        /* Task Modal Styles */
-        .task-modal-content {
-            background-color: #fefefe;
-            margin: 5% auto;
-            padding: 30px;
-            border: 1px solid #888;
-            width: 50%;
-            border-radius: 10px;
-            position: relative;
-        }
-        .task-modal-content h2 {
-            margin-top: 0;
-        }
-        .task-modal-content p {
-            margin: 10px 0;
-        }
-        .task-modal-content button {
-            margin-right: 10px;
-            padding: 8px 12px;
-            font-size: 14px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        #edit-task-button {
-            background-color: #f1c40f;
-            color: #fff;
-        }
-        #edit-task-button:hover {
-            background-color: #d4ac0d;
-        }
-        #delete-task-button {
-            background-color: #e74c3c;
-            color: #fff;
-        }
-        #delete-task-button:hover {
-            background-color: #c0392b;
-        }
-        #complete-task-button {
-            background-color: #27ae60;
-            color: #fff;
-        }
-        #complete-task-button:hover {
-            background-color: #1e8449;
-        }
-
-        /* Icon Button Styles */
-        .icon-button {
-            background-color: transparent;
-            border: none;
-            cursor: pointer;
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 1000;
-            padding: 5px;
-            border-radius: 50%;
-            transition: background-color 0.3s;
-        }
-        .icon-button:hover {
-            background-color: rgba(0, 0, 0, 0.1);
-        }
-        .icon-image {
-            width: 40px;
-            height: 40px;
-        }
-    </style>
-    {% endblock %}
-</head>
+    <head>
+        {% block head %}
+        <meta charset="UTF-8">
+        <title>Calendar - Color Tasker</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+        <style>
+            /* Add this to make the body fill the entire screen */
+            body {
+                height: 100vh;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+    
+            /* Update the container to fill the available space */
+            .container {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding: 20px;
+                width: 90%; /* Increased width to 90% */
+            }
+    
+            /* Update the calendar container to fill the available space */
+            .calendar-container {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding: 20px;
+                width: 90%; /* Increased width to 90% */
+            }
+    
+            /* Update the calendar grid to fill the available space */
+            .calendar-grid {
+                flex: 1;
+                display: grid;
+                grid-template-columns: repeat(7, 1fr);
+                gap: 10px;
+                margin-top: 20px;
+                width: 100%; /* Set width to 100% */
+            }
+    
+            /* Update the task modal to fill the available space */
+            .task-modal-content {
+                width: 90%; /* Increased width to 90% */
+                margin: 5% auto;
+                padding: 30px;
+                border: 1px solid #888;
+                border-radius: 10px;
+                position: relative;
+            }
+    
+            /* Add this to make the calendar grid cells wider */
+            .calendar-grid-cell {
+                width: 100%; /* Set width to 100% */
+                padding: 20px;
+            }
+        </style>
+        {% endblock %}
+    </head>
 <body>
     <!-- Dashboard Button -->
     <button id="dashboard-button" class="icon-button" title="Back to Dashboard">

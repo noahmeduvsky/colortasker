@@ -2,8 +2,8 @@ from sqlalchemy import create_engine
 
 class Config:
     SECRET_KEY = 'your-secret-key'
-    #Line below was changed for my windows setup -Noah
-    SQLALCHEMY_DATABASE_URI = "postgresql+pg8000://noah_meduvsky:colortasker@localhost:5432/color_tasker" 
+    #Line below was changed for my windows setup -Austin
+    SQLALCHEMY_DATABASE_URI = "postgresql+pg8000://lightbringer:colortasker@localhost:5432/color_tasker" 
     #SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://lightbringer:colortasker@localhost:5432/color_tasker"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
