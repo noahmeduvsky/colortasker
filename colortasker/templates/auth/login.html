@@ -3,59 +3,65 @@
 {% block title %}Log In{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <h1>Log In</h1>
-    <!-- Display flash messages -->
-    {% with messages = get_flashed_messages(with_categories=True) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-            {{ message }}
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
+<div class="form-container">
+  <h1 style="color: black;">WELCOME TO</h1>
+  <h1 style="background: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">COLORTASKER</h1>
+  <h1>Log In</h1>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=1.0">
 
-    {% if form %}
-    <form method="POST">
-        {{ form.hidden_tag() }}
-        <div class="form-group">
-            {{ form.username.label }}
-            {{ form.username(class="form-control") }}
-            {% if form.username.errors %}
-              <small class="text-danger">
-                {% for error in form.username.errors %}
-                  {{ error }}
-                {% endfor %}
-              </small>
-            {% endif %}
+
+  <!-- Display flash messages -->
+  {% with messages = get_flashed_messages(with_categories=True) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
         </div>
-        <div class="form-group">
-            {{ form.password.label }}
-            {{ form.password(class="form-control") }}
-            {% if form.password.errors %}
-              <small class="text-danger">
-                {% for error in form.password.errors %}
-                  {{ error }}
-                {% endfor %}
-              </small>
-            {% endif %}
-        </div>
-        <div class="form-group">
-            {{ form.submit(class="btn btn-primary") }}
-        </div>
-    </form>
-    {% else %}
-    <div class="alert alert-danger" role="alert">
-        <strong>Error:</strong> Form is not defined.
-    </div>
+      {% endfor %}
     {% endif %}
+  {% endwith %}
 
-    <p class="mt-3">
-        Don't have an account? <a href="{{ url_for('auth.signup') }}">Sign up here</a>.
-    </p>
+  <!-- Log In Form -->
+  {% if form %}
+  <form method="POST">
+      {{ form.hidden_tag() }}
+      <p>
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" class="form-control">
+          {% if form.username.errors %}
+            <small class="text-danger">
+              {% for error in form.username.errors %}
+                {{ error }}
+              {% endfor %}
+            </small>
+          {% endif %}
+      </p>
+      <p>
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" class="form-control">
+          {% if form.password.errors %}
+            <small class="text-danger">
+              {% for error in form.password.errors %}
+                {{ error }}
+              {% endfor %}
+            </small>
+          {% endif %}
+      </p>
+      <p>
+          <button type="submit" class="btn btn-primary">Log In</button>
+      </p>
+  </form>
+  {% else %}
+  <div class="alert alert-danger" role="alert">
+      <strong>Error:</strong> Form is not defined.
+  </div>
+  {% endif %}
+
+  <p class="mt-3">
+      Don't have an account? <a href="{{ url_for('auth.signup') }}">Sign up here</a>.
+  </p>
 </div>
 {% endblock %}

@@ -7,6 +7,7 @@
     <title>Dashboard - Color Tasker</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <style>
+        
         /* Modal styling */
         .modal {
             display: none;
@@ -116,6 +117,18 @@
         }
         .edit-folder-button:hover {
             color: #e74c3c;
+        }
+        .delete-folder-button {
+            background-color: transparent;
+            border: none;
+            color: #ecf0f1;
+            cursor: pointer;
+            font-size: 16px;
+            transition: color 0.3s; /* Smooth hover effect */
+        }
+
+        .delete-folder-button:hover {
+            color: #e74c3c; /* Change color on hover, same as edit button */
         }
         .task-block {
             width: 150px;
@@ -757,33 +770,62 @@
                     })
                     .then(response => response.json())
                     .then(data => {
-                        // Add new folder to the list
-                        const folderList = document.querySelector('.folder-list');
-                        const newFolderItem = document.createElement('li');
-                        const newFolderLink = document.createElement('a');
-                        newFolderLink.href = '#';
-                        newFolderLink.classList.add('folder-link');
-                        newFolderLink.dataset.folderId = data.folder_id;
-                        newFolderLink.textContent = data.folder_name;
-                        newFolderLink.addEventListener('click', function(e) {
-                            e.preventDefault();
-                            currentFolderId = this.dataset.folderId;
-                            openFolder(currentFolderId);
-                        });
-                        const editButton = document.createElement('button');
-                        editButton.classList.add('edit-folder-button');
-                        editButton.textContent = 'Edit';
-                        editButton.onclick = function() {
-                            editFolder(data.folder_id, data.folder_name);
-                        };
-                        newFolderItem.appendChild(newFolderLink);
-                        newFolderItem.appendChild(editButton);
-                        folderList.appendChild(newFolderItem);
+                        if (data.folder_id) {
+                            const folderList = document.querySelector('.folder-list');
+
+                            // Remove the "You have no folders" message if it exists
+                            const noFoldersMessage = folderList.querySelector('li');
+                            if (noFoldersMessage && noFoldersMessage.textContent === 'You have no folders.') {
+                                noFoldersMessage.remove();
+                            }
+
+                            // Create new folder list item
+                            const newFolderItem = document.createElement('li');
+
+                            // Create folder link
+                            const newFolderLink = document.createElement('a');
+                            newFolderLink.href = '#';
+                            newFolderLink.classList.add('folder-link');
+                            newFolderLink.dataset.folderId = data.folder_id;
+                            newFolderLink.textContent = data.folder_name;
+                            newFolderLink.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                currentFolderId = this.dataset.folderId;
+                                openFolder(currentFolderId);
+                            });
+
+                            // Create edit button
+                            const editButton = document.createElement('button');
+                            editButton.classList.add('edit-folder-button');
+                            editButton.textContent = 'Edit';
+                            editButton.onclick = function() {
+                                editFolder(data.folder_id, data.folder_name);
+                            };
+
+                            // Create delete button
+                            const deleteButton = document.createElement('button');
+                            deleteButton.classList.add('delete-folder-button');
+                            deleteButton.textContent = 'Delete';
+                            deleteButton.onclick = function() {
+                                deleteFolder(data.folder_id);
+                            };
+
+                            // Append elements to the new folder item
+                            newFolderItem.appendChild(newFolderLink);
+                            newFolderItem.appendChild(editButton);
+                            newFolderItem.appendChild(deleteButton);
+
+                            // Append the new folder item to the folder list
+                            folderList.appendChild(newFolderItem);
+                        } else if (data.error) {
+                            alert(data.error);
+                        }
                     })
                     .catch(error => console.error('Error:', error));
                 }
                 addDropdown.style.display = 'none';
             };
+
 
             // Add New Task
             document.getElementById('add-new-task').onclick = function() {

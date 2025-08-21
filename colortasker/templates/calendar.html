@@ -2,314 +2,222 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    {% block head %}
-    <meta charset="UTF-8">
-    <title>Calendar - Color Tasker</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <style>
-        /* Calendar Styles */
-        .calendar-container {
-            margin: 20px auto;
-            max-width: 1000px;
-        }
-        .calendar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .calendar-header h2 {
-            margin: 0;
-        }
-        .calendar-header button {
-            background-color: #3498db;
-            color: #fff;
-            border: none;
-            padding: 10px 15px;
-            cursor: pointer;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-        .calendar-header button:hover {
-            background-color: #2980b9;
-        }
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 5px;
-            margin-top: 20px;
-        }
-        .calendar-day {
-            background-color: #ecf0f1;
-            padding: 10px;
-            min-height: 120px;
-            border-radius: 5px;
-            position: relative;
-            box-sizing: border-box;
-        }
-        .calendar-day-header {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        .task-tile {
-            color: #fff;
-            padding: 5px;
-            border-radius: 3px;
-            margin-bottom: 5px;
-            font-size: 12px;
-            cursor: pointer;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            position: relative;
-        }
-        .task-tile:hover .task-description {
-            display: block;
-        }
-        .task-description {
-            display: none;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background-color: rgba(0,0,0,0.8);
-            color: #fff;
-            padding: 5px;
-            border-radius: 3px;
-            font-size: 10px;
-            width: 100%;
-            box-sizing: border-box;
-            z-index: 10;
-        }
-        .today {
-            border: 2px solid #3498db;
-        }
-
-        /* Task Modal Styles */
-        .task-modal-content {
-            background-color: #fefefe;
-            margin: 5% auto;
-            padding: 30px;
-            border: 1px solid #888;
-            width: 50%;
-            border-radius: 10px;
-            position: relative;
-        }
-        .task-modal-content h2 {
-            margin-top: 0;
-        }
-        .task-modal-content p {
-            margin: 10px 0;
-        }
-        .task-modal-content button {
-            margin-right: 10px;
-            padding: 8px 12px;
-            font-size: 14px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        #edit-task-button {
-            background-color: #f1c40f;
-            color: #fff;
-        }
-        #edit-task-button:hover {
-            background-color: #d4ac0d;
-        }
-        #delete-task-button {
-            background-color: #e74c3c;
-            color: #fff;
-        }
-        #delete-task-button:hover {
-            background-color: #c0392b;
-        }
-        #complete-task-button {
-            background-color: #27ae60;
-            color: #fff;
-        }
-        #complete-task-button:hover {
-            background-color: #1e8449;
-        }
-
-        /* Icon Button Styles */
-        .icon-button {
-            background-color: transparent;
-            border: none;
-            cursor: pointer;
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 1000;
-            padding: 5px;
-            border-radius: 50%;
-            transition: background-color 0.3s;
-        }
-        .icon-button:hover {
-            background-color: rgba(0, 0, 0, 0.1);
-        }
-        .icon-image {
-            width: 40px;
-            height: 40px;
-        }
-    </style>
-    {% endblock %}
+{% block head %}
+<meta charset="UTF-8">
+<title>Calendar - Color Tasker</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+<style>
+/* Add this to make the body fill the entire screen */
+body {
+height: 100vh;
+margin: 0;
+padding: 0;
+display: flex;
+flex-direction: column;
+align-items: center;
+}
+/* Update the container to fill the available space */
+.container {
+flex: 1;
+display: flex;
+flex-direction: column;
+align-items: center;
+padding: 20px;
+width: 90%; /* Increased width to 90% */
+}
+/* Update the calendar container to fill the available space */
+.calendar-container {
+flex: 1;
+display: flex;
+flex-direction: column;
+align-items: center;
+padding: 20px;
+width: 90%; /* Increased width to 90% */
+}
+/* Update the calendar grid to fill the available space */
+.calendar-grid {
+flex: 1;
+display: grid;
+grid-template-columns: repeat(7, 1fr);
+gap: 10px;
+margin-top: 20px;
+width: 100%; /* Set width to 100% */
+}
+/* Update the task modal to fill the available space */
+.task-modal-content {
+width: 90%; /* Increased width to 90% */
+margin: 5% auto;
+padding: 30px;
+border: 1px solid #888;
+border-radius: 10px;
+position: relative;
+}
+/* Add this to make the calendar grid cells wider */
+.calendar-grid-cell {
+width: 100%; /* Set width to 100% */
+padding: 20px;
+}
+</style>
+{% endblock %}
 </head>
 <body>
-    <!-- Dashboard Button -->
-    <button id="dashboard-button" class="icon-button" title="Back to Dashboard">
-        <img src="{{ url_for('static', filename='images/dashboard_icon.png') }}" alt="Dashboard" class="icon-image">
-    </button>
+<!-- Dashboard Button -->
+<button id="dashboard-button" class="icon-button" title="Back to Dashboard">
+<img src="{{ url_for('static', filename='images/dashboard_icon.png') }}" alt="Dashboard" class="icon-image">
+</button>
 
-    <div class="container">
-        <div class="calendar-container">
-            <div class="calendar-header">
-                <button onclick="changeMonth(-1)">&lt; Prev</button>
-                <h2 id="calendar-month-year">{{ current_month_year }}</h2>
-                <button onclick="changeMonth(1)">Next &gt;</button>
-            </div>
-            <div class="calendar-grid">
-                <!-- Weekday Headers -->
-                <div class="calendar-day-header">Mon</div>
-                <div class="calendar-day-header">Tue</div>
-                <div class="calendar-day-header">Wed</div>
-                <div class="calendar-day-header">Thu</div>
-                <div class="calendar-day-header">Fri</div>
-                <div class="calendar-day-header">Sat</div>
-                <div class="calendar-day-header">Sun</div>
+<div class="container">
+<div class="calendar-container">
+<div class="calendar-header">
+<button onclick="changeMonth(-1)">&lt; Prev</button>
+<h2 id="calendar-month-year">{{ current_month_year }}</h2>
+<button onclick="changeMonth(1)">Next &gt;</button>
+</div>
+<div class="calendar-grid">
+<!-- Weekday Headers -->
+<div class="calendar-day-header">Mon</div>
+<div class="calendar-day-header">Tue</div>
+<div class="calendar-day-header">Wed</div>
+<div class="calendar-day-header">Thu</div>
+<div class="calendar-day-header">Fri</div>
+<div class="calendar-day-header">Sat</div>
+<div class="calendar-day-header">Sun</div>
 
-                {% for day in calendar_days %}
-                    <div class="calendar-day {% if day.is_today %}today{% endif %}">
-                        <div class="calendar-day-header">{{ day.day }}</div>
-                        {% for task in day.tasks %}
-                            <div class="task-tile" style="background-color: {{ task.color }};" onclick="openTaskModal({{ task.id }})">
-                                {{ task.name }}
-                                {% if task.description %}
-                                    <div class="task-description">{{ task.description }}</div>
-                                {% endif %}
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
+{% for day in calendar_days %}
+<div class="calendar-day {% if day.is_today %}today{% endif %}">
+<div class="calendar-day-header">{{ day.day }}</div>
+{% for task in day.tasks %}
+<div class="task-tile" style="background-color: {{ task.color }};" onclick="openTaskModal({{ task.id }})">
+{{ task.name }}
+{% if task.description %}
+<div class="task-description">{{ task.description }}</div>
+{% endif %}
+</div>
+{% endfor %}
+</div>
+{% endfor %}
+</div>
+</div>
+</div>
 
-    <!-- Task Modal -->
-    <div id="task-modal" class="modal">
-        <div class="task-modal-content">
-            <span class="close-button" id="close-task-modal">&times;</span>
-            <h2 id="task-modal-title">Task Details</h2>
-            <div id="task-details">
-                <!-- Task details will be populated here -->
-            </div>
-            <button id="edit-task-button">Edit Task</button>
-            <button id="delete-task-button">Delete Task</button>
-            <button id="complete-task-button">Mark as Complete</button>
-        </div>
-    </div>
+<!-- Task Modal -->
+<div id="task-modal" class="modal">
+<div class="task-modal-content">
+<span class="close-button" id="close-task-modal">&times;</span>
+<h2 id="task-modal-title">Task Details</h2>
+<div id="task-details">
+<!-- Task details will be populated here -->
+</div>
+<button id="edit-task-button">Edit Task</button>
+<button id="delete-task-button">Delete Task</button>
+<button id="complete-task-button">Mark as Complete</button>
+</div>
+</div>
 
-    <!-- Confirmation Modal -->
-    <div id="confirm-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-button" id="close-confirm-modal">&times;</span>
-            <p id="confirm-message"></p>
-            <button id="confirm-yes-button">Yes</button>
-            <button id="confirm-no-button">No</button>
-        </div>
-    </div>
+<!-- Confirmation Modal -->
+<div id="confirm-modal" class="modal">
+<div class="modal-content">
+<span class="close-button" id="close-confirm-modal">&times;</span>
+<p id="confirm-message"></p>
+<button id="confirm-yes-button">Yes</button>
+<button id="confirm-no-button">No</button>
+</div>
+</div>
 
-    {% block scripts %}
-    <script>
-        let currentMonth = {{ current_month }};
-        let currentYear = {{ current_year }};
-        let currentTaskId = null;
-        let actionType = ''; // 'delete' or 'complete'
+{% block scripts %}
+<script>
+let currentMonth = {{ current_month }};
+let currentYear = {{ current_year }};
+let currentTaskId = null;
+let actionType = ''; // 'delete' or 'complete'
 
-        // Dashboard Button Click Handler
-        document.getElementById('dashboard-button').onclick = function() {
-            window.location.href = "{{ url_for('main.dashboard') }}";
-        };
+// Dashboard Button Click Handler
+document.getElementById('dashboard-button').onclick = function() {
+window.location.href = "{{ url_for('main.dashboard') }}";
+};
 
-        function changeMonth(delta) {
-            currentMonth += delta;
-            if (currentMonth < 1) {
-                currentMonth = 12;
-                currentYear -= 1;
-            } else if (currentMonth > 12) {
-                currentMonth = 1;
-                currentYear += 1;
-            }
-            window.location.href = `{{ url_for('main.calendar_view') }}?month=${currentMonth}&year=${currentYear}`;
-        }
+function changeMonth(delta) {
+currentMonth += delta;
+if (currentMonth < 1) {
+currentMonth = 12;
+currentYear -= 1;
+} else if (currentMonth > 12) {
+currentMonth = 1;
+currentYear += 1;
+}
+window.location.href = `{{ url_for('main.calendar_view') }}?month=${currentMonth}&year=${currentYear}`;
+}
 
-        function openTaskModal(taskId) {
-            fetch(`{{ url_for('main.get_task') }}?task_id=${taskId}`)
-            .then(response => response.json())
-            .then(taskData => {
-                const taskDetails = document.getElementById('task-details');
-                taskDetails.innerHTML = `
-                    <p><strong>Name:</strong> ${taskData.task_name}</p>
-                    <p><strong>Description:</strong> ${taskData.description || 'No description'}</p>
-                    <p><strong>Deadline:</strong> ${taskData.deadline || 'No deadline'}</p>
-                    <p><strong>Folder:</strong> ${taskData.folder_name}</p>
-                `;
-                document.getElementById('edit-task-button').onclick = function() {
-                    // Redirect to dashboard and open the task modal
-                    window.location.href = `{{ url_for('main.dashboard') }}?edit_task=${taskId}`;
-                };
-                document.getElementById('delete-task-button').onclick = function() {
-                    confirmAction('delete', taskId);
-                };
-                document.getElementById('complete-task-button').onclick = function() {
-                    confirmAction('complete', taskId);
-                };
-                document.getElementById('task-modal').style.display = 'block';
-            })
-            .catch(error => console.error('Error:', error));
-        }
+function openTaskModal(taskId) {
+fetch(`{{ url_for('main.get_task') }}?task_id=${taskId}`)
+.then(response => response.json())
+.then(taskData => {
+const taskDetails = document.getElementById('task-details');
+taskDetails.innerHTML = `
+<p><strong>Name:</strong> ${taskData.task_name}</p>
+<p><strong>Description:</strong> ${taskData.description || 'No description'}</p>
+<p><strong>Deadline:</strong> ${taskData.deadline || 'No deadline'}</p>
+<p><strong>Folder:</strong> ${taskData.folder_name}</p>
+`;
+document.getElementById('edit-task-button').onclick = function() {
+// Redirect to dashboard and open the task modal
+window.location.href = `{{ url_for('main.dashboard') }}?edit_task=${taskId}`;
+};
+document.getElementById('delete-task-button').onclick = function() {
+confirmAction('delete', taskId);
+};
+document.getElementById('complete-task-button').onclick = function() {
+confirmAction('complete', taskId);
+};
+document.getElementById('task-modal').style.display = 'block';
+})
+.catch(error => console.error('Error:', error));
+}
 
-        // Close Task Modal
-        document.getElementById('close-task-modal').onclick = function() {
-            document.getElementById('task-modal').style.display = 'none';
-        };
+// Close Task Modal
+document.getElementById('close-task-modal').onclick = function() {
+document.getElementById('task-modal').style.display = 'none';
+};
 
-        // Confirm Delete or Complete Action
-        function confirmAction(type, taskId) {
-            actionType = type;
-            currentTaskId = taskId;
-            const message = type === 'delete' ? 'Are you sure you want to delete this task?' : 'Mark this task as complete?';
-            document.getElementById('confirm-message').textContent = message;
-            document.getElementById('confirm-modal').style.display = 'block';
-        }
+// Confirm Delete or Complete Action
+function confirmAction(type, taskId) {
+actionType = type;
+currentTaskId = taskId;
+const message = type === 'delete' ? 'Are you sure you want to delete this task?' : 'Mark this task as complete?';
+document.getElementById('confirm-message').textContent = message;
+document.getElementById('confirm-modal').style.display = 'block';
+}
 
-        // Handle Confirmation
-        document.getElementById('confirm-yes-button').onclick = function() {
-            const url = actionType === 'delete' ? '{{ url_for('main.delete_task') }}' : '{{ url_for('main.mark_complete') }}';
-            fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify({ task_id: currentTaskId })
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.message);
-                document.getElementById('confirm-modal').style.display = 'none';
-                document.getElementById('task-modal').style.display = 'none';
-                window.location.reload();
-            })
-            .catch(error => console.error('Error:', error));
-        };
+// Handle Confirmation
+document.getElementById('confirm-yes-button').onclick = function() {
+const url = actionType === 'delete' ? '{{ url_for('main.delete_task') }}' : '{{ url_for('main.mark_complete') }}';
+fetch(url, {
+method: 'POST',
+headers: {
+'Content-Type': 'application/json',
+'X-CSRFToken': '{{ csrf_token() }}'
+},
+body: JSON.stringify({ task_id: currentTaskId })
+})
+.then(response => response.json())
+.then(data => {
+alert(data.message);
+document.getElementById('confirm-modal').style.display = 'none';
+document.getElementById('task-modal').style.display = 'none';
+window.location.reload();
+})
+.catch(error => console.error('Error:', error));
+};
 
-        document.getElementById('confirm-no-button').onclick = function() {
-            document.getElementById('confirm-modal').style.display = 'none';
-        };
+document.getElementById('confirm-no-button').onclick = function() {
+document.getElementById('confirm-modal').style.display = 'none';
+};
 
-        // Close Confirmation Modal
-        document.getElementById('close-confirm-modal').onclick = function() {
-            document.getElementById('confirm-modal').style.display = 'none';
-        };
-    </script>
-    {% endblock %}
+// Close Confirmation Modal
+document.getElementById('close-confirm-modal').onclick = function() {
+document.getElementById('confirm-modal').style.display = 'none';
+};
+</script>
+{% endblock %}
 </body>
 </html>
